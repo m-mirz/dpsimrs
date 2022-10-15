@@ -35,7 +35,7 @@ impl Simulation{
             }
         }
 
-        for (comp_param) in net.comp_params.iter() {
+        for comp_param in net.comp_params.iter() {
             match comp_param {
                 ComponentParams::Resistor(res_params) => {
                     let n1 = net.node_params.iter().position(|&x| x == res_params.node_1).expect("Could not map node!");
@@ -64,7 +64,7 @@ impl Simulation{
     }
 
     pub fn stamp(&mut self, net: &mut Network) {
-        for (comp) in net.comps.iter_mut() {
+        for comp in net.comps.iter_mut() {
             match comp {
                 ComponentType::Resistor(res) => {
                     res.calculate_stamp();
@@ -75,7 +75,7 @@ impl Simulation{
             }            
         }
 
-        for (comp) in net.comps.iter() {
+        for comp in net.comps.iter() {
             match comp {
                 ComponentType::Resistor(res) => {
                     self.stamp_branch(res);

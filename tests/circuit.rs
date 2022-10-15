@@ -1,12 +1,8 @@
-use components::{Network, NodeType, NodeParams, ComponentParams, ResistorParams, CurrentSourceParams};
-use simulation::Simulation;
+use dpsimrs::components::{Network, NodeType, NodeParams, ComponentParams, ResistorParams, CurrentSourceParams};
+use dpsimrs::simulation::Simulation;
 
-mod math;
-mod components;
-mod simulation;
-
-fn main() {
-    
+#[test]
+fn res_csrc_circuit() {
     let mut net = Network::new();
 
     let grd = NodeParams{
@@ -41,7 +37,7 @@ fn main() {
     net.add_component(&c1);
     println!("{:?}", net);
 
-    let mut sim = simulation::Simulation::new(&mut net);
+    let mut sim = Simulation::new(&mut net);
 
     sim.generate_sim_objects(&mut net);
     println!("Nodes: \n{:?}\n", net.nodes);
@@ -53,16 +49,10 @@ fn main() {
     sim.stamp(&mut net);
     println!("{}", sim.net_matrix);
     println!("{}", sim.rhs_vector);
-    //components::stamp_resistor(&res1, &mut network_matrix);
-    //components::stamp_resistor(&res2, &mut network_matrix);
-    //components::stamp_current_source(&csrc, &mut rhs_vector);
 
-    //println!("{}", network_matrix);
-    //println!("{}", rhs_vector);
-
-    //let decomp = network_matrix.lu();
-    //let lhs_vector = decomp.solve(&rhs_vector).expect("msg");
-
-    //println!("{}", lhs_vector);
-
+    let decomp = sim.net_matrix.lu();
+    let lhs_vector = decomp.solve(&sim.rhs_vector).expect("msg");
+    println!("{}", lhs_vector);
+    
+    assert_eq!(lhs_vector[0], -5.0);
 }
