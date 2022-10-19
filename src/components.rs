@@ -13,17 +13,17 @@ pub struct NodeParams {
 }
 
 #[derive(Debug)]
-pub enum ComponentParams<'a> { 
+pub enum ComponentParams<'a> {
     Resistor(ResistorParams<'a>),
     CurrentSource(CurrentSourceParams<'a>),
 }
 
 #[derive(Debug)]
-pub struct ResistorParams<'a> { 
+pub struct ResistorParams<'a> {
     pub id: String,
     pub resistance: f64,
     pub node_1: &'a NodeParams,
-    pub node_2: &'a NodeParams, 
+    pub node_2: &'a NodeParams,
 }
 
 #[derive(Debug)]
@@ -41,11 +41,11 @@ pub enum ComponentType<'a> {
 }
 
 #[derive(Debug)]
-pub struct Network<'a> {    
+pub struct Network<'a> {
     pub node_params: Vec<&'a NodeParams>,
     pub comp_params: Vec<&'a ComponentParams<'a>>,
     pub nodes: Vec<Node<'a>>,
-    pub comps: Vec<ComponentType<'a>>,    
+    pub comps: Vec<ComponentType<'a>>,
 }
 
 impl<'a> Network<'a> {

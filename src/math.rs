@@ -1,7 +1,7 @@
 extern crate nalgebra as na;
 
 use na::{
-    OMatrix, Dynamic, Matrix, ArrayStorage, U2, Matrix2x1, 
+    OMatrix, Dynamic, Matrix, ArrayStorage, U2, Matrix2x1,
     //Complex,
 };
 

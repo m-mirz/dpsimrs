@@ -18,8 +18,8 @@ fn res_csrc_circuit() {
     net.add_node(&grd);
     net.add_node(&n1);
 
-    let r1 = ComponentParams::Resistor(ResistorParams{ 
-        id: String::from("r1"), 
+    let r1 = ComponentParams::Resistor(ResistorParams{
+        id: String::from("r1"),
         resistance: 1.0,
         node_1: &grd,
         node_2: &n1,
@@ -53,6 +53,6 @@ fn res_csrc_circuit() {
     let decomp = sim.net_matrix.lu();
     let lhs_vector = decomp.solve(&sim.rhs_vector).expect("msg");
     println!("{}", lhs_vector);
-    
+
     assert_eq!(lhs_vector[0], -5.0);
 }
