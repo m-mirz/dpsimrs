@@ -3,13 +3,13 @@ use crate::math::{Matrix2x1f64, Matrix2x2f64};
 pub const GROUND: usize = usize::MAX;
 
 #[repr(usize)]
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Eq, Debug)]
 pub enum NodeType {
     Network,
     Ground = GROUND,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct NodeParams {
     pub id: String,
     pub node_type: NodeType,
@@ -43,7 +43,7 @@ pub enum ComponentType<'a> {
     CurrentSource(CurrentSource<'a>),
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct NetworkParams {
     pub nodes: Vec<NodeParams>,
     pub comps: Vec<ComponentParams>,
