@@ -37,7 +37,7 @@ fn res_csrc_circuit() {
     println!("{:?}", net_params);
 
     let mut net_state = NetworkState::new();
-    net_state.generate_sim_objects(&net_params);
+    net_state.generate_sim_objects(net_params);
 
     println!("Nodes: \n{:?}\n", net_state.nodes);
     println!("Components: \n{:?}\n", net_state.comps);

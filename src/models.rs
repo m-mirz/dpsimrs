@@ -38,9 +38,9 @@ pub struct CurrentSourceParams {
 }
 
 #[derive(Debug)]
-pub enum ComponentType<'a> {
-    Resistor(Resistor<'a>),
-    CurrentSource(CurrentSource<'a>),
+pub enum ComponentType {
+    Resistor(Resistor),
+    CurrentSource(CurrentSource),
 }
 
 #[derive(Debug, Default)]
@@ -73,20 +73,20 @@ impl NetworkParams {
 }
 
 #[derive(Debug)]
-pub struct Node<'a> {
-    pub params: &'a NodeParams,
+pub struct Node {
+    pub params: NodeParams,
     pub index: usize,
 }
 
 #[derive(Debug)]
-pub struct Resistor<'a> {
-    pub params: &'a ResistorParams,
+pub struct Resistor {
+    pub params: ResistorParams,
     pub stamp: Matrix2x2f64,
     pub node_1_idx: usize,
     pub node_2_idx: usize,
 }
 
-impl Resistor<'_> {
+impl Resistor {
     pub fn calculate_stamp(&mut self) {
         let conductance = 1.0 / self.params.resistance;
         self.stamp = Matrix2x2f64::new(conductance, -conductance, -conductance, conductance);
@@ -94,26 +94,26 @@ impl Resistor<'_> {
 }
 
 #[derive(Debug)]
-pub struct CurrentSource<'a> {
-    pub params: &'a CurrentSourceParams,
+pub struct CurrentSource {
+    pub params: CurrentSourceParams,
     pub stamp: Matrix2x1f64,
     pub node_1_idx: usize,
     pub node_2_idx: usize,
 }
 
-impl CurrentSource<'_> {
+impl CurrentSource {
     pub fn calculate_stamp(&mut self) {
         self.stamp = Matrix2x1f64::new(self.params.set_point, -self.params.set_point);
     }
 }
 
 #[derive(Debug)]
-pub struct NetworkState<'a> {
-    pub nodes: Vec<Node<'a>>,
-    pub comps: Vec<ComponentType<'a>>,
+pub struct NetworkState {
+    pub nodes: Vec<Node>,
+    pub comps: Vec<ComponentType>,
 }
 
-impl<'a> NetworkState<'a> {
+impl NetworkState {
     pub fn new() -> Self {
         Self {
             nodes: Vec::new(),
@@ -121,8 +121,8 @@ impl<'a> NetworkState<'a> {
         }
     }
 
-    pub fn generate_sim_objects(&mut self, net_params: &'a NetworkParams) {
-        for (idx, node_params) in net_params.nodes.iter().enumerate() {
+    pub fn generate_sim_objects(&mut self, net_params: NetworkParams) {
+        for (idx, node_params) in net_params.nodes.into_iter().enumerate() {
             if node_params.node_type != NodeType::Ground {
                 self.nodes.push(Node {
                     params: node_params,
@@ -131,22 +131,22 @@ impl<'a> NetworkState<'a> {
             }
         }
 
-        for comp_param in net_params.comps.iter() {
+        for comp_param in net_params.comps.into_iter() {
             match comp_param {
                 ComponentParams::Resistor(res_params) => {
                     self.comps.push(ComponentType::Resistor(Resistor {
-                        params: res_params,
                         stamp: Matrix2x2f64::zeros(),
                         node_1_idx: res_params.node_1,
                         node_2_idx: res_params.node_2,
+                        params: res_params,
                     }));
                 }
                 ComponentParams::CurrentSource(src_params) => {
                     self.comps.push(ComponentType::CurrentSource(CurrentSource {
-                        params: src_params,
                         stamp: Matrix2x1f64::zeros(),
                         node_1_idx: src_params.node_1,
                         node_2_idx: src_params.node_2,
+                        params: src_params,
                     }));
                 }
             }
