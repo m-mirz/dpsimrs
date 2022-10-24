@@ -1,20 +1,23 @@
-use dpsimrs::models::{NetworkParams, NetworkState, NodeType, NodeParams, ComponentParams, ResistorParams, CurrentSourceParams};
+use dpsimrs::models::{
+    ComponentParams, CurrentSourceParams, NetworkParams, NetworkState, NodeParams, NodeType,
+    ResistorParams,
+};
 use dpsimrs::simulation::Simulation;
 
 #[test]
 fn res_csrc_circuit() {
     let mut net_params = NetworkParams::new();
 
-    let grd = net_params.add_node(NodeParams{
+    let grd = net_params.add_node(NodeParams {
         id: "GRD".to_string(),
         node_type: NodeType::Ground,
     });
-    let n1 = net_params.add_node(NodeParams{
+    let n1 = net_params.add_node(NodeParams {
         id: "N1".to_string(),
         node_type: NodeType::Network,
     });
 
-    let r1 = ComponentParams::Resistor(ResistorParams{
+    let r1 = ComponentParams::Resistor(ResistorParams {
         id: String::from("r1"),
         resistance: 1.0,
         node_1: grd,

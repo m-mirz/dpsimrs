@@ -1,4 +1,4 @@
-use crate::math::{Matrix2x2f64, Matrix2x1f64};
+use crate::math::{Matrix2x1f64, Matrix2x2f64};
 
 pub const GROUND: usize = usize::MAX;
 
@@ -40,7 +40,7 @@ pub struct CurrentSourceParams {
 #[derive(Debug)]
 pub enum ComponentType<'a> {
     Resistor(Resistor<'a>),
-    CurrentSource(CurrentSource<'a>)
+    CurrentSource(CurrentSource<'a>),
 }
 
 #[derive(Debug)]
@@ -89,8 +89,7 @@ pub struct Resistor<'a> {
 impl Resistor<'_> {
     pub fn calculate_stamp(&mut self) {
         let conductance = 1.0 / self.params.resistance;
-        self.stamp = Matrix2x2f64::new( conductance, -conductance,
-                                        -conductance, conductance);
+        self.stamp = Matrix2x2f64::new(conductance, -conductance, -conductance, conductance);
     }
 }
 
@@ -104,8 +103,7 @@ pub struct CurrentSource<'a> {
 
 impl CurrentSource<'_> {
     pub fn calculate_stamp(&mut self) {
-        self.stamp = Matrix2x1f64::new(self.params.set_point,
-                                      -self.params.set_point);
+        self.stamp = Matrix2x1f64::new(self.params.set_point, -self.params.set_point);
     }
 }
 
@@ -126,7 +124,7 @@ impl<'a> NetworkState<'a> {
     pub fn generate_sim_objects(&mut self, net_params: &'a NetworkParams) {
         for (idx, node_params) in net_params.nodes.iter().enumerate() {
             if node_params.node_type != NodeType::Ground {
-                self.nodes.push(Node{
+                self.nodes.push(Node {
                     params: node_params,
                     index: idx,
                 });
@@ -136,15 +134,15 @@ impl<'a> NetworkState<'a> {
         for comp_param in net_params.comps.iter() {
             match comp_param {
                 ComponentParams::Resistor(res_params) => {
-                    self.comps.push(ComponentType::Resistor(Resistor{
+                    self.comps.push(ComponentType::Resistor(Resistor {
                         params: res_params,
                         stamp: Matrix2x2f64::zeros(),
                         node_1_idx: res_params.node_1,
                         node_2_idx: res_params.node_2,
-                   }));
+                    }));
                 }
                 ComponentParams::CurrentSource(src_params) => {
-                    self.comps.push(ComponentType::CurrentSource(CurrentSource{
+                    self.comps.push(ComponentType::CurrentSource(CurrentSource {
                         params: src_params,
                         stamp: Matrix2x1f64::zeros(),
                         node_1_idx: src_params.node_1,

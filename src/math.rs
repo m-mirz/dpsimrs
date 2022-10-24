@@ -1,8 +1,13 @@
 extern crate nalgebra as na;
 
 use na::{
-    OMatrix, Dynamic, Matrix, ArrayStorage, U2, Matrix2x1,
+    ArrayStorage,
+    Dynamic,
+    Matrix,
+    Matrix2x1,
     //Complex,
+    OMatrix,
+    U2,
 };
 
 pub type DMatrixf64 = OMatrix<f64, Dynamic, Dynamic>;

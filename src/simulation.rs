@@ -1,7 +1,6 @@
-use std::ops::{AddAssign};
-use crate::math::{DMatrixf64};
-use crate::models::{NetworkState, ComponentType, Resistor, CurrentSource, GROUND};
-
+use crate::math::DMatrixf64;
+use crate::models::{ComponentType, CurrentSource, NetworkState, Resistor, GROUND};
+use std::ops::AddAssign;
 
 pub struct Simulation {
     pub net_matrix: DMatrixf64,
@@ -9,7 +8,7 @@ pub struct Simulation {
     pub net_size: usize,
 }
 
-impl Simulation{
+impl Simulation {
     pub fn new(net: &mut NetworkState) -> Self {
         let node_number = net.nodes.len();
 
@@ -37,20 +36,24 @@ impl Simulation{
 
     pub fn stamp_branch(&mut self, branch: &Resistor) {
         if branch.node_1_idx != GROUND {
-            self.net_matrix[(branch.node_1_idx, branch.node_1_idx)].add_assign(branch.stamp[(0,0)]);
+            self.net_matrix[(branch.node_1_idx, branch.node_1_idx)]
+                .add_assign(branch.stamp[(0, 0)]);
         }
 
         if branch.node_2_idx != GROUND {
-            self.net_matrix[(branch.node_2_idx, branch.node_2_idx)].add_assign(branch.stamp[(1,1)]);
+            self.net_matrix[(branch.node_2_idx, branch.node_2_idx)]
+                .add_assign(branch.stamp[(1, 1)]);
         }
 
         if branch.node_1_idx != GROUND && branch.node_2_idx != GROUND {
-            self.net_matrix[(branch.node_1_idx, branch.node_2_idx)].add_assign(branch.stamp[(0,1)]);
-            self.net_matrix[(branch.node_2_idx, branch.node_1_idx)].add_assign(branch.stamp[(1,0)]);
+            self.net_matrix[(branch.node_1_idx, branch.node_2_idx)]
+                .add_assign(branch.stamp[(0, 1)]);
+            self.net_matrix[(branch.node_2_idx, branch.node_1_idx)]
+                .add_assign(branch.stamp[(1, 0)]);
         }
     }
 
-    pub fn stamp_source(&mut self, source: &CurrentSource, ) {
+    pub fn stamp_source(&mut self, source: &CurrentSource) {
         if source.node_1_idx != GROUND {
             self.rhs_vector[(source.node_1_idx, 0)] = -source.params.set_point;
         }
