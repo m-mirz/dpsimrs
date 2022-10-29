@@ -1,0 +1,18 @@
+{
+	"name": "DPsim-rs",
+	"dockerComposeFile": "../docker-compose.yml",
+	"service": "dpsimrs",
+	"workspaceFolder": "/dpsimrs",
+	"containerUser": "dpsimrs",
+	"mounts": [
+		{
+			"source": "${localWorkspaceFolder}",
+			"target": "/dpsimrs",
+			"type": "bind"
+		}
+	],
+	"runArgs": [
+		"--cap-add=SYS_PTRACE"
+	],
+	"onCreateCommand": "mkdir -p /home/dpsimrs/.ssh && ln -s /run/secrets/user_ssh_key /home/dpsimrs/.ssh/id_ed25519"
+}
