@@ -1,8 +1,9 @@
 FROM rust:bullseye
 
 RUN apt-get -y update
-RUN apt-get -y install sudo python3-dev python-dev python3-pip
+RUN apt-get -y install sudo python3-dev python-dev python3-pip vim nano
 RUN pip install maturin
+RUN rustup component add rustfmt
 
 ARG USERNAME=dpsimrs
 ARG USER_UID=1000
