@@ -51,7 +51,7 @@ fn res_csrc_circuit() {
     println!("{}", sim.rhs_vector);
 
     let decomp = sim.net_matrix.lu();
-    let lhs_vector = decomp.solve(&sim.rhs_vector).expect("msg");
+    let lhs_vector = decomp.solve(&sim.rhs_vector.0).expect("msg");
     println!("{}", lhs_vector);
 
     assert_eq!(lhs_vector[0], -5.0);

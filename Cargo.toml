@@ -11,4 +11,6 @@ crate-type = ["rlib", "cdylib"]
 
 [dependencies]
 nalgebra = "0.31.1"
+numpy = { git="https://github.com/PyO3/rust-numpy", features = ["nalgebra"] }
 pyo3 = { version = "0.17.2", features = ["extension-module"] }
+ndarray = "0.15.6"
