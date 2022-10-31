@@ -1,27 +1,33 @@
 use crate::math::{Matrix2x1f64, Matrix2x2f64};
+use pyo3::prelude::*;
 
 pub const GROUND: usize = usize::MAX;
 
 #[repr(usize)]
-#[derive(PartialEq, Eq, Debug)]
+#[pyclass]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub enum NodeType {
     Network,
     Ground = GROUND,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[pyclass]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub struct NodeParams {
     pub id: String,
     pub node_type: NodeType,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, FromPyObject)]
 pub enum ComponentParams {
+    #[pyo3(transparent)]
     Resistor(ResistorParams),
+    #[pyo3(transparent)]
     CurrentSource(CurrentSourceParams),
 }
 
-#[derive(Debug)]
+#[pyclass]
+#[derive(Debug, Clone)]
 pub struct ResistorParams {
     pub id: String,
     pub resistance: f64,
@@ -29,7 +35,8 @@ pub struct ResistorParams {
     pub node_2: usize,
 }
 
-#[derive(Debug)]
+#[pyclass]
+#[derive(Debug, Clone)]
 pub struct CurrentSourceParams {
     pub id: String,
     pub set_point: f64,
@@ -37,19 +44,25 @@ pub struct CurrentSourceParams {
     pub node_2: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, FromPyObject)]
 pub enum ComponentType {
+    #[pyo3(transparent)]
     Resistor(Resistor),
+    #[pyo3(transparent)]
     CurrentSource(CurrentSource),
 }
 
-#[derive(Debug, Default)]
+#[pyclass]
+#[derive(Debug, Default, Clone)]
 pub struct NetworkParams {
     pub nodes: Vec<NodeParams>,
     pub comps: Vec<ComponentParams>,
 }
 
+#[pymethods]
 impl NetworkParams {
+
+    #[new]
     pub fn new() -> Self {
         Self {
             nodes: Vec::new(),
@@ -72,13 +85,39 @@ impl NetworkParams {
     }
 }
 
+#[pymethods]
+impl ResistorParams {
+    #[new]
+    pub fn new(id: String, resistance: f64, node_1: usize, node_2: usize) -> Self {
+        ResistorParams { id, resistance, node_1, node_2 }
+    }
+}
+
+#[pymethods]
+impl CurrentSourceParams {
+    #[new]
+    pub fn new(id: String, set_point: f64, node_1: usize, node_2: usize) -> Self {
+        CurrentSourceParams { id, set_point, node_1, node_2 }
+    }
+}
+
+#[pymethods]
+impl NodeParams {
+    #[new]
+    pub fn new(id: String, node_type: NodeType) -> Self {
+        NodeParams { id, node_type }
+    }
+}
+
 #[derive(Debug)]
+#[pyclass]
 pub struct Node {
     pub params: NodeParams,
     pub index: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
+#[pyclass]
 pub struct Resistor {
     pub params: ResistorParams,
     pub stamp: Matrix2x2f64,
@@ -93,7 +132,8 @@ impl Resistor {
     }
 }
 
-#[derive(Debug)]
+#[pyclass]
+#[derive(Debug, Clone)]
 pub struct CurrentSource {
     pub params: CurrentSourceParams,
     pub stamp: Matrix2x1f64,
@@ -107,13 +147,17 @@ impl CurrentSource {
     }
 }
 
+#[pyclass]
 #[derive(Debug)]
 pub struct NetworkState {
     pub nodes: Vec<Node>,
     pub comps: Vec<ComponentType>,
 }
 
+#[pymethods]
 impl NetworkState {
+
+    #[new]
     pub fn new() -> Self {
         Self {
             nodes: Vec::new(),

@@ -1,14 +1,19 @@
 use crate::math::DMatrixf64;
 use crate::models::{ComponentType, CurrentSource, NetworkState, Resistor, GROUND};
 use std::ops::AddAssign;
+use pyo3::prelude::*;
 
+#[pyclass]
 pub struct Simulation {
     pub net_matrix: DMatrixf64,
     pub rhs_vector: DMatrixf64,
     pub net_size: usize,
 }
 
+#[pymethods]
 impl Simulation {
+
+    #[new]
     pub fn new(net: &mut NetworkState) -> Self {
         let node_number = net.nodes.len();
 
