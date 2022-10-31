@@ -70,4 +70,8 @@ impl Simulation {
             self.rhs_vector.0[(source.node_2_idx, 0)] = source.params.set_point;
         }
     }
+
+    pub fn solve(&self) -> DMatrixf64 {
+        DMatrixf64(self.net_matrix.clone().lu().solve(&self.rhs_vector.0).expect("Solve matrix-vector equation system"))
+    }
 }
