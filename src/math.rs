@@ -2,11 +2,7 @@ extern crate nalgebra as na;
 
 use std::fmt::Display;
 
-use na::{
-    ArrayStorage,
-    Dynamic,
-    U2, OMatrix, Matrix, Matrix2x1, LU,
-};
+use na::{ArrayStorage, Dynamic, Matrix, Matrix2x1, OMatrix, LU, U2};
 use numpy::ToPyArray;
 use pyo3::prelude::*;
 
@@ -42,9 +38,10 @@ impl Display for DMatrixf64 {
 }
 
 impl Matrix2x2f64 {
-
     pub fn new(m11: f64, m12: f64, m21: f64, m22: f64) -> Self {
-        Self(Matrix::<f64, U2, U2, ArrayStorage<f64, 2, 2>>::new(m11, m12, m21, m22))
+        Self(Matrix::<f64, U2, U2, ArrayStorage<f64, 2, 2>>::new(
+            m11, m12, m21, m22,
+        ))
     }
 
     pub fn zeros() -> Self {
@@ -65,7 +62,6 @@ impl Display for Matrix2x2f64 {
 }
 
 impl Matrix2x1f64 {
-
     pub fn new(x: f64, y: f64) -> Self {
         Self(Matrix2x1::<f64>::new(x, y))
     }

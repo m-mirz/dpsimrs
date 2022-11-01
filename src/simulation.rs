@@ -15,7 +15,6 @@ pub struct Simulation {
 
 #[pymethods]
 impl Simulation {
-
     #[new]
     pub fn new(net: &mut NetworkState) -> Self {
         let node_number = net.nodes.len();
@@ -72,6 +71,12 @@ impl Simulation {
     }
 
     pub fn solve(&self) -> DMatrixf64 {
-        DMatrixf64(self.net_matrix.clone().lu().solve(&self.rhs_vector.0).expect("Solve matrix-vector equation system"))
+        DMatrixf64(
+            self.net_matrix
+                .clone()
+                .lu()
+                .solve(&self.rhs_vector.0)
+                .expect("Solve matrix-vector equation system"),
+        )
     }
 }

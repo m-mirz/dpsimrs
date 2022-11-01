@@ -1,7 +1,12 @@
 use pyo3::prelude::*;
 
-use crate::{models::{NetworkParams, ResistorParams, CurrentSourceParams, NodeType, NodeParams, CurrentSource, Node, Resistor, NetworkState}, simulation::Simulation};
-
+use crate::{
+    models::{
+        CurrentSource, CurrentSourceParams, NetworkParams, NetworkState, Node, NodeParams,
+        NodeType, Resistor, ResistorParams,
+    },
+    simulation::Simulation,
+};
 
 #[pymodule]
 fn dpsimrs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {

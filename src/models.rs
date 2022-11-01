@@ -61,7 +61,6 @@ pub struct NetworkParams {
 
 #[pymethods]
 impl NetworkParams {
-
     #[new]
     pub fn new() -> Self {
         Self {
@@ -89,7 +88,12 @@ impl NetworkParams {
 impl ResistorParams {
     #[new]
     pub fn new(id: String, resistance: f64, node_1: usize, node_2: usize) -> Self {
-        ResistorParams { id, resistance, node_1, node_2 }
+        ResistorParams {
+            id,
+            resistance,
+            node_1,
+            node_2,
+        }
     }
 }
 
@@ -97,7 +101,12 @@ impl ResistorParams {
 impl CurrentSourceParams {
     #[new]
     pub fn new(id: String, set_point: f64, node_1: usize, node_2: usize) -> Self {
-        CurrentSourceParams { id, set_point, node_1, node_2 }
+        CurrentSourceParams {
+            id,
+            set_point,
+            node_1,
+            node_2,
+        }
     }
 }
 
@@ -156,7 +165,6 @@ pub struct NetworkState {
 
 #[pymethods]
 impl NetworkState {
-
     #[new]
     pub fn new() -> Self {
         Self {
