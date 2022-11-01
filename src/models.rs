@@ -72,10 +72,10 @@ impl NetworkParams {
     pub fn add_node(&mut self, node_param: NodeParams) -> usize {
         if node_param.node_type == NodeType::Ground {
             // maximum value of usize is reserved for ground node
-            return NodeType::Ground as usize;
+            NodeType::Ground as usize
         } else {
             self.nodes.push(node_param);
-            return self.nodes.len() - 1;
+            self.nodes.len() - 1
         }
     }
 
@@ -157,7 +157,7 @@ impl CurrentSource {
 }
 
 #[pyclass]
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct NetworkState {
     pub nodes: Vec<Node>,
     pub comps: Vec<ComponentType>,
