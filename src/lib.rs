@@ -1,3 +1,4 @@
 mod math;
-pub mod components;
+pub mod models;
+pub mod python;
 pub mod simulation;

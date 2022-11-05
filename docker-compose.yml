@@ -1,0 +1,15 @@
+name: dpsimrs-compose
+services:
+  dpsimrs:
+    build:
+      dockerfile: Dockerfile
+    cap_add:
+      - SYS_PTRACE
+    stdin_open: true
+    tty: true
+    secrets:
+      - user_ssh_key 
+
+secrets:
+  user_ssh_key:
+    file: ~/.ssh/id_ed25519
