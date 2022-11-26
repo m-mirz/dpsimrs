@@ -4,6 +4,9 @@ use pyo3::prelude::*;
 
 pub const GROUND: usize = usize::MAX;
 
+// suppress clippy warning, false positive?
+// https://github.com/rust-lang/rust-clippy/issues/8043
+#[allow(clippy::enum_clike_unportable_variant)]
 #[repr(usize)]
 #[pyclass]
 #[derive(PartialEq, Eq, Debug, Clone)]
