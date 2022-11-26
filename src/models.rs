@@ -1,4 +1,5 @@
-use crate::math::{Matrix2x1f64, Matrix2x2f64};
+use crate::math::{Matrix2x1c64, Matrix2x2c64};
+use nalgebra::Complex;
 use pyo3::prelude::*;
 
 pub const GROUND: usize = usize::MAX;
@@ -21,16 +22,17 @@ pub struct NodeParams {
 #[derive(Debug, Clone, FromPyObject)]
 pub enum ComponentParams {
     #[pyo3(transparent)]
-    Resistor(ResistorParams),
-    #[pyo3(transparent)]
     CurrentSource(CurrentSourceParams),
+    #[pyo3(transparent)]
+    Line(LineParams),
 }
 
 #[pyclass]
 #[derive(Debug, Clone)]
-pub struct ResistorParams {
+pub struct LineParams {
     pub id: String,
     pub resistance: f64,
+    pub reactance: f64,
     pub node_1: usize,
     pub node_2: usize,
 }
@@ -39,17 +41,10 @@ pub struct ResistorParams {
 #[derive(Debug, Clone)]
 pub struct CurrentSourceParams {
     pub id: String,
-    pub set_point: f64,
+    pub set_point_re: f64,
+    pub set_point_im: f64,
     pub node_1: usize,
     pub node_2: usize,
-}
-
-#[derive(Debug, FromPyObject)]
-pub enum ComponentType {
-    #[pyo3(transparent)]
-    Resistor(Resistor),
-    #[pyo3(transparent)]
-    CurrentSource(CurrentSource),
 }
 
 #[pyclass]
@@ -85,12 +80,13 @@ impl NetworkParams {
 }
 
 #[pymethods]
-impl ResistorParams {
+impl LineParams {
     #[new]
-    pub fn new(id: String, resistance: f64, node_1: usize, node_2: usize) -> Self {
-        ResistorParams {
+    pub fn new(id: String, resistance: f64, reactance: f64, node_1: usize, node_2: usize) -> Self {
+        LineParams {
             id,
             resistance,
+            reactance,
             node_1,
             node_2,
         }
@@ -100,10 +96,17 @@ impl ResistorParams {
 #[pymethods]
 impl CurrentSourceParams {
     #[new]
-    pub fn new(id: String, set_point: f64, node_1: usize, node_2: usize) -> Self {
+    pub fn new(
+        id: String,
+        set_point_re: f64,
+        set_point_im: f64,
+        node_1: usize,
+        node_2: usize,
+    ) -> Self {
         CurrentSourceParams {
             id,
-            set_point,
+            set_point_re,
+            set_point_im,
             node_1,
             node_2,
         }
@@ -125,19 +128,25 @@ pub struct Node {
     pub index: usize,
 }
 
-#[derive(Debug, Clone)]
-#[pyclass]
-pub struct Resistor {
-    pub params: ResistorParams,
-    pub stamp: Matrix2x2f64,
-    pub node_1_idx: usize,
-    pub node_2_idx: usize,
+#[derive(Debug, FromPyObject)]
+pub enum ComponentType {
+    #[pyo3(transparent)]
+    Line(Line),
+    #[pyo3(transparent)]
+    CurrentSource(CurrentSource),
 }
 
-impl Resistor {
+#[derive(Debug, Clone)]
+#[pyclass]
+pub struct Line {
+    pub params: LineParams,
+    pub stamp: Matrix2x2c64,
+}
+
+impl Line {
     pub fn calculate_stamp(&mut self) {
-        let conductance = 1.0 / self.params.resistance;
-        self.stamp = Matrix2x2f64::new(conductance, -conductance, -conductance, conductance);
+        let admittance = 1.0 / Complex::new(self.params.resistance, self.params.reactance);
+        self.stamp = Matrix2x2c64::new(admittance, -admittance, -admittance, admittance);
     }
 }
 
@@ -145,14 +154,13 @@ impl Resistor {
 #[derive(Debug, Clone)]
 pub struct CurrentSource {
     pub params: CurrentSourceParams,
-    pub stamp: Matrix2x1f64,
-    pub node_1_idx: usize,
-    pub node_2_idx: usize,
+    pub stamp: Matrix2x1c64,
 }
 
 impl CurrentSource {
     pub fn calculate_stamp(&mut self) {
-        self.stamp = Matrix2x1f64::new(self.params.set_point, -self.params.set_point);
+        let set_point = Complex::new(self.params.set_point_re, self.params.set_point_im);
+        self.stamp = Matrix2x1c64::new(set_point, -set_point);
     }
 }
 
@@ -185,19 +193,15 @@ impl NetworkState {
 
         for comp_param in net_params.comps.into_iter() {
             match comp_param {
-                ComponentParams::Resistor(res_params) => {
-                    self.comps.push(ComponentType::Resistor(Resistor {
-                        stamp: Matrix2x2f64::zeros(),
-                        node_1_idx: res_params.node_1,
-                        node_2_idx: res_params.node_2,
+                ComponentParams::Line(res_params) => {
+                    self.comps.push(ComponentType::Line(Line {
+                        stamp: Matrix2x2c64::zeros(),
                         params: res_params,
                     }));
                 }
                 ComponentParams::CurrentSource(src_params) => {
                     self.comps.push(ComponentType::CurrentSource(CurrentSource {
-                        stamp: Matrix2x1f64::zeros(),
-                        node_1_idx: src_params.node_1,
-                        node_2_idx: src_params.node_2,
+                        stamp: Matrix2x1c64::zeros(),
                         params: src_params,
                     }));
                 }
