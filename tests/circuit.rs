@@ -30,8 +30,7 @@ fn res_csrc_circuit() {
 
     let c1 = ComponentParams::CurrentSource(CurrentSourceParams {
         id: String::from("c1"),
-        set_point_re: 5.0,
-        set_point_im: 0.0,
+        set_point: Complex::new(5.0, 0.0),
         node_1: n1,
         node_2: grd,
     });

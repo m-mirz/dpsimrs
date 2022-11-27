@@ -44,8 +44,7 @@ pub struct LineParams {
 #[derive(Debug, Clone)]
 pub struct CurrentSourceParams {
     pub id: String,
-    pub set_point_re: f64,
-    pub set_point_im: f64,
+    pub set_point: Complex<f64>,
     pub node_1: usize,
     pub node_2: usize,
 }
@@ -99,17 +98,10 @@ impl LineParams {
 #[pymethods]
 impl CurrentSourceParams {
     #[new]
-    pub fn new(
-        id: String,
-        set_point_re: f64,
-        set_point_im: f64,
-        node_1: usize,
-        node_2: usize,
-    ) -> Self {
+    pub fn new(id: String, set_point: Complex<f64>, node_1: usize, node_2: usize) -> Self {
         CurrentSourceParams {
             id,
-            set_point_re,
-            set_point_im,
+            set_point,
             node_1,
             node_2,
         }
@@ -162,8 +154,7 @@ pub struct CurrentSource {
 
 impl CurrentSource {
     pub fn calculate_stamp(&mut self) {
-        let set_point = Complex::new(self.params.set_point_re, self.params.set_point_im);
-        self.stamp = Matrix2x1c64::new(set_point, -set_point);
+        self.stamp = Matrix2x1c64::new(self.params.set_point, -self.params.set_point);
     }
 }
 
