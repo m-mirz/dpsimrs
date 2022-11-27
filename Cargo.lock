@@ -52,6 +52,7 @@ version = "0.1.0"
 dependencies = [
  "nalgebra",
  "ndarray",
+ "num-complex",
  "numpy",
  "pyo3",
 ]
@@ -255,6 +256,7 @@ dependencies = [
  "indoc",
  "libc",
  "memoffset",
+ "num-complex",
  "parking_lot",
  "pyo3-build-config",
  "pyo3-ffi",

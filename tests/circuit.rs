@@ -1,8 +1,9 @@
 use dpsimrs::models::{
-    ComponentParams, CurrentSourceParams, NetworkParams, NetworkState, NodeParams, NodeType,
-    ResistorParams,
+    ComponentParams, CurrentSourceParams, LineParams, NetworkParams, NetworkState, NodeParams,
+    NodeType,
 };
 use dpsimrs::simulation::Simulation;
+use nalgebra::Complex;
 
 #[test]
 fn res_csrc_circuit() {
@@ -17,9 +18,10 @@ fn res_csrc_circuit() {
         node_type: NodeType::Network,
     });
 
-    let r1 = ComponentParams::Resistor(ResistorParams {
+    let r1 = ComponentParams::Line(LineParams {
         id: String::from("r1"),
         resistance: 1.0,
+        reactance: 0.0,
         node_1: grd,
         node_2: n1,
     });
@@ -28,7 +30,7 @@ fn res_csrc_circuit() {
 
     let c1 = ComponentParams::CurrentSource(CurrentSourceParams {
         id: String::from("c1"),
-        set_point: 5.0,
+        set_point: Complex::new(5.0, 0.0),
         node_1: n1,
         node_2: grd,
     });
@@ -43,16 +45,16 @@ fn res_csrc_circuit() {
     println!("Components: \n{:?}\n", net_state.comps);
 
     let mut sim = Simulation::new(&mut net_state);
-    println!("{}", sim.net_matrix);
-    println!("{}", sim.rhs_vector);
+    println!("Network Matrix: \n{}", sim.net_matrix);
+    println!("Right-hand vector: \n{}", sim.rhs_vector);
 
     sim.stamp(&mut net_state);
-    println!("{}", sim.net_matrix);
-    println!("{}", sim.rhs_vector);
+    println!("Network Matrix: \n{}", sim.net_matrix);
+    println!("Right-hand vector: \n{}", sim.rhs_vector);
 
     let decomp = sim.net_matrix.lu();
     let lhs_vector = decomp.solve(&sim.rhs_vector.0).expect("msg");
-    println!("{}", lhs_vector);
+    println!("Left-hand vector: \n{}", lhs_vector);
 
-    assert_eq!(lhs_vector[0], -5.0);
+    assert_eq!(lhs_vector[0], Complex::new(5.0, 0.0));
 }
