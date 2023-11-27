@@ -12,7 +12,10 @@ pub const GROUND: usize = usize::MAX;
 #[derive(PartialEq, Eq, Debug, Clone)]
 pub enum NodeType {
     Network,
-    Ground = GROUND,
+    PQbus,
+    PVbus,
+    RefBus,
+    Ground = GROUND
 }
 
 #[pyclass]
@@ -22,12 +25,45 @@ pub struct NodeParams {
     pub node_type: NodeType,
 }
 
+#[derive(Debug)]
+#[pyclass]
+pub struct Node {
+    pub params: NodeParams,
+    pub index: usize,
+}
+
+#[pyclass]
+#[derive(Debug, Default, Clone)]
+pub struct NetworkParams {
+    pub nodes: Vec<NodeParams>,
+    pub comps: Vec<ComponentParams>,
+}
+
+#[pyclass]
+#[derive(Debug, Default)]
+pub struct NetworkState {
+    pub nodes: Vec<Node>,
+    pub comps: Vec<ComponentType>,
+}
+
 #[derive(Debug, Clone, FromPyObject)]
 pub enum ComponentParams {
     #[pyo3(transparent)]
     CurrentSource(CurrentSourceParams),
     #[pyo3(transparent)]
     Line(LineParams),
+    #[pyo3(transparent)]
+    PQSource(PQSourceParams)
+}
+
+#[derive(Debug, FromPyObject)]
+pub enum ComponentType {
+    #[pyo3(transparent)]
+    Line(Line),
+    #[pyo3(transparent)]
+    CurrentSource(CurrentSource),
+    #[pyo3(transparent)]
+    PQSource(PQSource)
 }
 
 #[pyclass]
@@ -40,6 +76,13 @@ pub struct LineParams {
     pub node_2: usize,
 }
 
+#[derive(Debug, Clone)]
+#[pyclass]
+pub struct Line {
+    pub params: LineParams,
+    pub stamp: Matrix2x2c64,
+}
+
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct CurrentSourceParams {
@@ -50,10 +93,33 @@ pub struct CurrentSourceParams {
 }
 
 #[pyclass]
-#[derive(Debug, Default, Clone)]
-pub struct NetworkParams {
-    pub nodes: Vec<NodeParams>,
-    pub comps: Vec<ComponentParams>,
+#[derive(Debug, Clone)]
+pub struct CurrentSource {
+    pub params: CurrentSourceParams,
+    pub stamp: Matrix2x1c64,
+}
+
+#[pyclass]
+#[derive(Debug, Clone)]
+pub struct PQSourceParams {
+    pub id: String,
+    pub set_point: Complex<f64>,
+    pub node: usize,
+}
+
+#[pyclass]
+#[derive(Debug, Clone)]
+pub struct PQSource {
+    pub params: PQSourceParams,
+    pub stamp: Matrix2x1c64,
+}
+
+#[pymethods]
+impl NodeParams {
+    #[new]
+    pub fn new(id: String, node_type: NodeType) -> Self {
+        NodeParams { id, node_type }
+    }
 }
 
 #[pymethods]
@@ -79,90 +145,6 @@ impl NetworkParams {
     pub fn add_component(&mut self, comp_param: ComponentParams) {
         self.comps.push(comp_param);
     }
-}
-
-#[pymethods]
-impl LineParams {
-    #[new]
-    pub fn new(id: String, resistance: f64, reactance: f64, node_1: usize, node_2: usize) -> Self {
-        LineParams {
-            id,
-            resistance,
-            reactance,
-            node_1,
-            node_2,
-        }
-    }
-}
-
-#[pymethods]
-impl CurrentSourceParams {
-    #[new]
-    pub fn new(id: String, set_point: Complex<f64>, node_1: usize, node_2: usize) -> Self {
-        CurrentSourceParams {
-            id,
-            set_point,
-            node_1,
-            node_2,
-        }
-    }
-}
-
-#[pymethods]
-impl NodeParams {
-    #[new]
-    pub fn new(id: String, node_type: NodeType) -> Self {
-        NodeParams { id, node_type }
-    }
-}
-
-#[derive(Debug)]
-#[pyclass]
-pub struct Node {
-    pub params: NodeParams,
-    pub index: usize,
-}
-
-#[derive(Debug, FromPyObject)]
-pub enum ComponentType {
-    #[pyo3(transparent)]
-    Line(Line),
-    #[pyo3(transparent)]
-    CurrentSource(CurrentSource),
-}
-
-#[derive(Debug, Clone)]
-#[pyclass]
-pub struct Line {
-    pub params: LineParams,
-    pub stamp: Matrix2x2c64,
-}
-
-impl Line {
-    pub fn calculate_stamp(&mut self) {
-        let admittance = 1.0 / Complex::new(self.params.resistance, self.params.reactance);
-        self.stamp = Matrix2x2c64::new(admittance, -admittance, -admittance, admittance);
-    }
-}
-
-#[pyclass]
-#[derive(Debug, Clone)]
-pub struct CurrentSource {
-    pub params: CurrentSourceParams,
-    pub stamp: Matrix2x1c64,
-}
-
-impl CurrentSource {
-    pub fn calculate_stamp(&mut self) {
-        self.stamp = Matrix2x1c64::new(self.params.set_point, -self.params.set_point);
-    }
-}
-
-#[pyclass]
-#[derive(Debug, Default)]
-pub struct NetworkState {
-    pub nodes: Vec<Node>,
-    pub comps: Vec<ComponentType>,
 }
 
 #[pymethods]
@@ -199,7 +181,59 @@ impl NetworkState {
                         params: src_params,
                     }));
                 }
+                ComponentParams::PQSource(src_params) => {
+                    self.comps.push(ComponentType::PQSource(PQSource {
+                        stamp: Matrix2x1c64::zeros(),
+                        params: src_params,
+                    }));
+                }
             }
         }
+    }
+}
+
+#[pymethods]
+impl LineParams {
+    #[new]
+    pub fn new(id: String, resistance: f64, reactance: f64, node_1: usize, node_2: usize) -> Self {
+        LineParams {
+            id,
+            resistance,
+            reactance,
+            node_1,
+            node_2,
+        }
+    }
+}
+
+impl Line {
+    pub fn calculate_stamp(&mut self) {
+        let admittance = 1.0 / Complex::new(self.params.resistance, self.params.reactance);
+        self.stamp = Matrix2x2c64::new(admittance, -admittance, -admittance, admittance);
+    }
+}
+
+#[pymethods]
+impl CurrentSourceParams {
+    #[new]
+    pub fn new(id: String, set_point: Complex<f64>, node_1: usize, node_2: usize) -> Self {
+        CurrentSourceParams {
+            id,
+            set_point,
+            node_1,
+            node_2,
+        }
+    }
+}
+
+impl CurrentSource {
+    pub fn calculate_stamp(&mut self) {
+        self.stamp = Matrix2x1c64::new(self.params.set_point, -self.params.set_point);
+    }
+}
+
+impl PQSource {
+    pub fn calculate_stamp(&mut self) {
+        self.stamp = Matrix2x1c64::new(self.params.set_point, -self.params.set_point);
     }
 }

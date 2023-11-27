@@ -37,6 +37,10 @@ impl Simulation {
                     src.calculate_stamp();
                     self.stamp_node_injection(&src.stamp, src.params.node_1, src.params.node_2);
                 }
+                ComponentType::PQSource(src) => {
+                    src.calculate_stamp();
+                    self.stamp_node_injection_grounded(&src.stamp, src.params.node);
+                }
             }
         }
     }
@@ -75,6 +79,12 @@ impl Simulation {
 
         if node_2 != GROUND {
             self.rhs_vector.0[(node_2, 0)].assign_elem(stamp.0[(1, 0)]);
+        }
+    }
+
+    pub fn stamp_node_injection_grounded(&mut self, stamp: &Matrix2x1c64, node: usize) {
+        if node != GROUND {
+            self.rhs_vector.0[(node, 0)].assign_elem(stamp.0[(0, 0)]);
         }
     }
 }
